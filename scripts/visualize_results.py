@@ -226,7 +226,6 @@ def visualize_travel_times(filename="complete_results.h5", analytical_filename="
         
         plt.tight_layout()
         plt.savefig('travel_time_visualization.png', dpi=300, bbox_inches='tight')
-        plt.show()
         
     except FileNotFoundError:
         print(f"Error: File {filename} not found. Please run the C++ solver first.")
