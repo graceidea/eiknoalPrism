@@ -1,0 +1,10 @@
+.vscode/
+build/
+dist/
+bin/
+
+.DS_Store
+*.o
+*.log
+*.tmp
+*.swp
