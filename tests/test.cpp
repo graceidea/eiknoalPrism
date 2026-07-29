@@ -8,7 +8,7 @@
 
 #include "eikon_solver_2d.hpp"
 #include "polygon_utils.hpp"
-#include "mesh_utils.hpp"
+#include "cartesianMesh_utils.hpp"
 #include "io_utils.hpp"
 
 
@@ -33,6 +33,10 @@ int main(int argc, char** argv) {
    
     //3, write outputs
     writeOutput(poly, grid, T_exact,xx, yy);   
-    
+    Vector2D norm;
+    for (unsigned i=0;i<poly.vertices.size();++i) {
+     norm=poly.compute_node_normal(i);
+     norm.print();
+    }
     return 0;
 }

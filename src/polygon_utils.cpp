@@ -221,6 +221,45 @@ double Polygon2D::perimeter() const {
     
     return perim;
 }
+    // Computes the outward unit normal at a specific node/vertex index
+Vector2D Polygon2D::compute_node_normal(size_t index) const {
+    size_t num_vertices = vertices.size();
+        if (num_vertices < 3) {
+            return { 0.0, 0.0 }; // A polygon must have at least 3 vertices
+        }
+
+        // 1. Identify the neighboring vertices with safe wrap-around indexing
+        const auto& V_curr = vertices[index];
+        const auto& V_prev = vertices[(index + num_vertices - 1) % num_vertices];
+        const auto& V_next = vertices[(index + 1) % num_vertices];
+
+        // 2. Compute the incoming and outgoing edge vectors
+        Vector2D e1 = { V_curr.x - V_prev.x, V_curr.y - V_prev.y };
+        Vector2D e2 = { V_next.x - V_curr.x, V_next.y - V_curr.y };
+
+        // 3. Compute outward edge normals
+        // For CCW winding, the outward normal of (x, y) is (y, -x)
+        // For CW winding, use (-y, x) instead
+        Vector2D n1 = {  e1.y, -e1.x };
+        Vector2D n2 = {  e2.y, -e2.x };
+
+        // 4. Normalize the edge normals to avoid edge-length bias
+        Vector2D u_n1 = n1.normalized();
+        Vector2D u_n2 = n2.normalized();
+
+        // 5. Average the two unit normals and normalize the final result
+        Vector2D n_sum = { u_n1.x + u_n2.x, u_n1.y + u_n2.y };
+        Vector2D vertex_normal = n_sum.normalized();
+
+        // Fallback safety check: 
+        // If the vertex forms a perfect 180-degree spike, the two unit vectors 
+        // will exactly cancel out. If that happens, fallback to one of the edge normals.
+        if (vertex_normal.x == 0.0 && vertex_normal.y == 0.0) {
+            return u_n1;
+        }
+
+        return vertex_normal;
+}        
 
 double pointToSegmentDistance(double px, double py, 
                               double x1, double y1, 
@@ -275,3 +314,4 @@ double signedDistanceToPolygon(double px, double py, const Polygon2D& poly) {
     bool inside = pointInPolygon(px, py, poly);
     return inside ? -minDist : minDist;
 }
+

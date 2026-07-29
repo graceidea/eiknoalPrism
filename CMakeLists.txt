@@ -142,8 +142,9 @@ endif()
 add_executable(test 
     tests/test.cpp
     src/polygon_utils.cpp      # ← ADD THESE THREE FILES
-    src/mesh_utils.cpp         # ← ADD THESE THREE FILES
+    src/cartesianMesh_utils.cpp         # ← ADD THESE THREE FILES
     src/io_utils.cpp           # ← ADD THESE THREE FILES
+    src/prismMesh_utils.cpp
 )
 target_link_libraries(test
     eikon_solver_2d 
@@ -198,8 +199,9 @@ install(FILES
     include/eikon_solver_2d.h
     include/hdf5_utils.h
     include/io_utils.hpp
-    include/mesh_utils.hpp
+    include/caresianMesh_utils.hpp
     include/polygon_utils.hpp
+    include/prismMesh_tuils.hpp
     DESTINATION include
 )
 

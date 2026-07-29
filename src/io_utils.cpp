@@ -96,6 +96,7 @@ void writeGridToVTK(const Eigen::VectorXd& xx, const Eigen::VectorXd& yy,
 void writeGridToMSH(const Eigen::VectorXd& xx, const Eigen::VectorXd& yy,
                         const std::string& filename) 
 {  
+    bool test=false;
     int nx = xx.size();
     int ny = yy.size();
     
@@ -159,7 +160,7 @@ void writeGridToMSH(const Eigen::VectorXd& xx, const Eigen::VectorXd& yy,
     msh_file << "$EndElements\n";
     
     msh_file.close();
-    std::cout << "Grid saved: " << filename << std::endl;
+    if (test)std::cout << "Grid saved: " << filename << std::endl;
 }
 void writeGridToMSH_22(const Eigen::VectorXd& xx, const Eigen::VectorXd& yy,
                         const std::string& filename) 

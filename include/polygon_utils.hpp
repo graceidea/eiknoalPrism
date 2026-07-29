@@ -3,10 +3,13 @@
 
 #include <vector>
 #include <cmath>
-
+#include <iostream>
 struct Point2D {
     double x, y;
-    Point2D(double x_ = 0.0, double y_ = 0.0) : x(x_), y(y_) {}
+    int id;
+    Point2D(double x_ = 0.0, double y_ = 0.0, int id_=1) 
+     : x(x_), y(y_), id(id_) {}
+    void setId(int id_) {id=id_;}
     double distanceTo(const Point2D& other) const {
         double dx = x - other.x;
         double dy = y - other.y;
@@ -48,7 +51,27 @@ struct Point2D {
         return Point2D(0, 0);
     }
 };
+// Structure representing a 2D Vector / Point
+struct Vector2D {
+    double x = 0.0;
+    double y = 0.0;
 
+    // Helper method to compute the magnitude (length) of the vector
+    double length() const {
+        return std::sqrt(x * x + y * y);
+    }
+    void print() const {
+        std::cout << "(" << x << ", " << y << ")\n";
+    }
+    // Helper method to return a normalized (unit) vector
+    Vector2D normalized() const {
+        double len = length();
+        if (len > 0.0) {
+            return { x / len, y / len };
+        }
+        return { 0.0, 0.0 }; // Return zero vector if length is 0
+    }
+};
 struct Polygon2D {
     std::vector<Point2D> vertices;    
     Point2D centroid() const;
@@ -60,6 +83,8 @@ struct Polygon2D {
     bool isValid() const;
     size_t numEdges() const { return vertices.size(); }
     double perimeter() const;   
+
+    Vector2D compute_node_normal(size_t index) const;
 private:
     // Helper for point-to-segment distance
     double pointToSegmentDistance(const Point2D& p, const Point2D& a, const Point2D& b) const;
