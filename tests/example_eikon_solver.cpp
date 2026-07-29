@@ -3,6 +3,54 @@
 #include <iostream>
 #include <chrono>
 
+
+#include <fstream>      // <-- ADD THIS for file output
+#include <iomanip>      // <-- ADD THIS for formatting
+#include <Eigen/Dense>
+//#include "eikon_solver.h"
+// ADD THE NEW FUNCTION HERE (after includes, before main)
+void saveAsVTK(const Eigen::MatrixXd& T, 
+               const Eigen::VectorXd& xx,
+               const Eigen::VectorXd& yy,
+               const std::string& filename) {
+    std::ofstream file(filename);
+    
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    // Write VTK header
+    file << "# vtk DataFile Version 3.0\n";
+    file << "Travel Time Field\n";
+    file << "ASCII\n";
+    file << "DATASET STRUCTURED_POINTS\n";
+    file << "DIMENSIONS " << T.rows() << " " << T.cols() << " 1\n";
+    
+    // Write origin and spacing
+    file << "ORIGIN " << xx(0) << " " << yy(0) << " 0.0\n";
+    double dx = (xx(xx.size()-1) - xx(0)) / (xx.size() - 1);
+    double dy = (yy(yy.size()-1) - yy(0)) / (yy.size() - 1);
+    file << "SPACING " << dx << " " << dy << " 1.0\n";
+    
+    // Write point data
+    file << "POINT_DATA " << T.rows() * T.cols() << "\n";
+    file << "SCALARS TravelTime double\n";
+    file << "LOOKUP_TABLE default\n";
+    
+    // Write data (row-major order)
+    // Note: VTK expects data in x fastest, y slowest order
+    for (int j = 0; j < T.cols(); ++j) {
+        for (int i = 0; i < T.rows(); ++i) {
+            file << std::setprecision(15) << T(i, j) << "\n";
+        }
+    }
+    
+    file.close();
+    std::cout << "Saved as VTK: " << filename << std::endl;
+}
+
+
 int main() {
     // Example usage of the C++ Eikonal solver
     
@@ -124,6 +172,10 @@ int main() {
             std::cout << std::endl;
         }
     }
+
+
+
+    saveAsVTK(T, xx, yy, "travel_times.vtk");
     
     // Save results to HDF5 using the dedicated utility class
     std::cout << "\nSaving results to HDF5..." << std::endl;
