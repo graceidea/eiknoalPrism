@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
+
 class EikonSolver2D {
 public:
     /**
@@ -42,6 +43,7 @@ private:
     static constexpr double eps = 1e-14;
     static constexpr double TAU_INF = 20.0;
     static constexpr double ref_t = 1.0;
+    //bool test;
 
     // Helper functions
     static void selectDirection(
@@ -51,16 +53,24 @@ private:
         int& x_start, int& x_end, int& y_start, int& y_end
     );
 
-    static void computeT0AndDerivatives(
-        const Eigen::VectorXd& xx,
+    //static void computeT0AndDerivatives(
+      //  const Eigen::VectorXd& xx,
+        //const Eigen::VectorXd& yy,
+        //double x0, double y0,
+        //double a0, double b0, double c0, double fun0,
+        //Eigen::MatrixXd& T0,
+        //Eigen::MatrixXd& T0x,
+        //Eigen::MatrixXd& T0y);
+    static void computeT0AndDerivatives(const Eigen::VectorXd& xx,
         const Eigen::VectorXd& yy,
         double x0, double y0,
         double a0, double b0, double c0, double fun0,
         Eigen::MatrixXd& T0,
         Eigen::MatrixXd& T0x,
-        Eigen::MatrixXd& T0y
-    );
-    
+        Eigen::MatrixXd& T0y,
+        const std::string& output_prefix = "output",
+        bool output_vtk = false,
+        bool output_gmsh = false);   
     static void initializeTauAndChange(
         const Eigen::VectorXd& xx,
         const Eigen::VectorXd& yy,
@@ -86,9 +96,9 @@ private:
     static void computeConvergenceMetrics(
         const Eigen::MatrixXd& tau,
         const Eigen::MatrixXd& tau_old,
-        const Eigen::MatrixXd& T0,
+        //const Eigen::MatrixXd& T0,
         double dx, double dy,
-        int nx, int ny,
+        //int nx, int ny,
         double& L1_dif, double& Linf_dif,
         double& L1_err, double& Linf_err
     );
@@ -136,6 +146,32 @@ private:
     static double* d_T;
     static bool gpu_initialized;
 #endif
+
+static void writeVTKGrid(const Eigen::VectorXd& xx,
+    const Eigen::VectorXd& yy,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Y,
+    const Eigen::MatrixXd& T0,
+    const Eigen::MatrixXd& T0x,
+    const Eigen::MatrixXd& T0y,
+    double x0, double y0,
+    const std::string& filename);
+static void writeVTKSourcePoint(double x0, double y0, const std::string& grid_filename);
+static void writeGmshGrid(const Eigen::VectorXd& xx,
+    const Eigen::VectorXd& yy,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Y,
+    const Eigen::MatrixXd& T0,
+    const Eigen::MatrixXd& T0x,
+    const Eigen::MatrixXd& T0y,
+    double x0, double y0,
+    const std::string& filename);
+
+static void writeGmshSourcePoint(double x0, double y0, 
+        const std::string& grid_filename);
+static void writeVTKSourceCurve(
+    const std::vector<Eigen::Vector2d>& curve_points,
+    const std::string& filename);
 };
 
 #endif // EIKON_SOLVER_2D_HPP

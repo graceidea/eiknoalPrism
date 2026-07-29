@@ -1,4 +1,7 @@
 #include "eikon_solver_2d.hpp"
+#include <fstream>
+#include <vector>
+#include <string>
 
 void EikonSolver2D::FSM_WENO3_PS_2d(
     const Eigen::VectorXd& xx,
@@ -60,8 +63,15 @@ void EikonSolver2D::FSM_WENO3_PS_2d(
     Eigen::MatrixXi ischange(nx, ny);
     
     // Compute T0 and its derivatives
-    computeT0AndDerivatives(xx, yy, x0, y0, a0, b0, c0, fun0, T0, T0x, T0y);
-    
+    bool test=true;
+    if (!test)
+     computeT0AndDerivatives(xx, yy, x0, y0, a0, b0, c0, fun0, T0, T0x, T0y,
+           "eiknoal_output",false,false);
+    else {
+     std::cout<<"NEW computeT0AndDerivatives"<<std::endl;
+     computeT0AndDerivatives(xx, yy, x0, y0, a0, b0, c0, fun0, T0, T0x, T0y,
+        "eikonal_output", true, true);
+     }
     // Initialize tau and ischange arrays
     initializeTauAndChange(xx, yy, x0, y0, dx, dy, tau, ischange);
     
@@ -152,7 +162,7 @@ void EikonSolver2D::FSM_WENO3_PS_2d(
                 
             }
             // Compute convergence metrics
-            computeConvergenceMetrics(tau, tau_old, T0, dx, dy, nx, ny, 
+            computeConvergenceMetrics(tau, tau_old, dx, dy,// nx, ny, 
                                  L1_dif, Linf_dif, L1_err, Linf_err);
             // Check convergence
             if (std::abs(L1_dif) < tol && Linf_dif < tol) {
@@ -162,10 +172,9 @@ void EikonSolver2D::FSM_WENO3_PS_2d(
         // Final result: T = tau + T0
         T = tau + T0;
     }
-
 }
-
-void EikonSolver2D::computeT0AndDerivatives(
+/*
+static void EikonSolver2D::computeT0AndDerivatives(
     const Eigen::VectorXd& xx,
     const Eigen::VectorXd& yy,
     double x0, double y0,
@@ -211,7 +220,7 @@ void EikonSolver2D::computeT0AndDerivatives(
     T0x = zero_mask.select(0.0, T0x_nonzero);
     T0y = zero_mask.select(0.0, T0y_nonzero);
 }
-
+*/
 void EikonSolver2D::initializeTauAndChange(
     const Eigen::VectorXd& xx,
     const Eigen::VectorXd& yy,
@@ -354,9 +363,9 @@ void EikonSolver2D::updateBoundaryConditions(
 void EikonSolver2D::computeConvergenceMetrics(
     const Eigen::MatrixXd& tau,
     const Eigen::MatrixXd& tau_old,
-    const Eigen::MatrixXd& T0,
+    //const Eigen::MatrixXd& T0,
     double dx, double dy,
-    int nx, int ny,
+    //int nx, int ny,
     double& L1_dif, double& Linf_dif,
     double& L1_err, double& Linf_err
 ) {
@@ -402,4 +411,377 @@ void EikonSolver2D::selectDirection(
         y_start = ny - 2;
         y_end = 2;
     }
+}
+
+
+
+void EikonSolver2D::computeT0AndDerivatives(
+    const Eigen::VectorXd& xx,
+    const Eigen::VectorXd& yy,
+    double x0, double y0,
+    double a0, double b0, double c0, double fun0,
+    Eigen::MatrixXd& T0,
+    Eigen::MatrixXd& T0x,
+    Eigen::MatrixXd& T0y,
+    const std::string& output_prefix,
+    bool output_vtk,
+    bool output_gmsh)
+{
+    std::cout<<"NEW computeT0AndDerivatives"<<std::endl;
+    int nx = static_cast<int>(xx.size());
+    int ny = static_cast<int>(yy.size());
+    
+    double det = a0 * b0 - c0 * c0;
+    double inv_det = 1.0 / det;
+    
+    // Create grid matrices using broadcasting == meshgrid
+    Eigen::MatrixXd X = xx.replicate(1, ny);
+    Eigen::MatrixXd Y = yy.transpose().replicate(nx, 1);
+    
+    // Compute displacement from source (vectorized)
+    Eigen::MatrixXd dx_grid = X.array() - x0;
+    Eigen::MatrixXd dy_grid = Y.array() - y0;
+    
+    // Compute quadratic form for all points (vectorized)
+    Eigen::MatrixXd quadratic_form = 
+        b0 * inv_det * dx_grid.array().square() + 
+        a0 * inv_det * dy_grid.array().square() + 
+        2.0 * c0 * inv_det * dx_grid.cwiseProduct(dy_grid).array();
+    
+    // Compute T0 (vectorized)
+    T0 = fun0 * quadratic_form.array().sqrt();
+    
+    // Create mask for zero T0 values
+    Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> zero_mask = 
+        (T0.array() == 0.0);
+    
+    // Compute derivatives for non-zero T0 values (vectorized)
+    Eigen::MatrixXd T0x_nonzero = 
+        fun0 * fun0 * (b0 * inv_det * dx_grid.array() + c0 * inv_det * dy_grid.array()) / T0.array();
+    Eigen::MatrixXd T0y_nonzero = 
+        fun0 * fun0 * (a0 * inv_det * dy_grid.array() + c0 * inv_det * dx_grid.array()) / T0.array();
+    
+    // Apply conditional assignment using select (vectorized)
+    T0x = zero_mask.select(0.0, T0x_nonzero);
+    T0y = zero_mask.select(0.0, T0y_nonzero);
+    
+    // ============================================================
+    // NEW: OUTPUT FUNCTIONS
+    // ============================================================
+    
+    if (output_vtk) {
+        std::cout<<"WRITE OUTPUT"<<std::endl;
+        // Write VTK legacy format (.vtk) - best for ParaView
+        writeVTKGrid(xx, yy, X, Y, T0, T0x, T0y, x0, y0, 
+                     output_prefix + "_grid.vtk");
+    }
+    
+    if (output_gmsh) {
+        std::cout<<"WRITE::GMSH"<<std::endl;
+        // Write Gmsh format (.msh) - best for Gmsh
+        writeGmshGrid(xx, yy, X, Y, T0, T0x, T0y, x0, y0,
+                      output_prefix + "_grid.msh");
+    }
+}
+
+// ============================================================
+// VTK OUTPUT FUNCTION (ParaView compatible)
+// ============================================================
+void EikonSolver2D::writeVTKGrid(
+    const Eigen::VectorXd& xx,
+    const Eigen::VectorXd& yy,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Y,
+    const Eigen::MatrixXd& T0,
+    const Eigen::MatrixXd& T0x,
+    const Eigen::MatrixXd& T0y,
+    double x0, double y0,
+    const std::string& filename
+) {
+    int nx = xx.size();
+    int ny = yy.size();
+    
+    std::ofstream vtk_file(filename);
+    if (!vtk_file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    // VTK header
+    vtk_file << "# vtk DataFile Version 3.0\n";
+    vtk_file << "2D Grid with T0, T0x, T0y, and Source Point\n";
+    vtk_file << "ASCII\n";
+    vtk_file << "DATASET STRUCTURED_GRID\n";
+    vtk_file << "DIMENSIONS " << nx << " " << ny << " 1\n";
+    vtk_file << "POINTS " << nx * ny << " float\n";
+    
+    // Write grid points
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            vtk_file << X(i, j) << " " << Y(i, j) << " 0.0\n";
+        }
+    }
+    
+    // Write point data
+    vtk_file << "POINT_DATA " << nx * ny << "\n";
+    
+    // T0 field
+    vtk_file << "SCALARS T0 float 1\n";
+    vtk_file << "LOOKUP_TABLE default\n";
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            vtk_file << T0(i, j) << "\n";
+        }
+    }
+    
+    // T0x field (x-derivative)
+    vtk_file << "SCALARS T0x float 1\n";
+    vtk_file << "LOOKUP_TABLE default\n";
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            vtk_file << T0x(i, j) << "\n";
+        }
+    }
+    
+    // T0y field (y-derivative)
+    vtk_file << "SCALARS T0y float 1\n";
+    vtk_file << "LOOKUP_TABLE default\n";
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            vtk_file << T0y(i, j) << "\n";
+        }
+    }
+    
+    // Vectors (gradient of T0)
+    vtk_file << "VECTORS gradient_T0 float\n";
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            vtk_file << T0x(i, j) << " " << T0y(i, j) << " 0.0\n";
+        }
+    }
+    
+    vtk_file.close();
+    std::cout << "VTK grid written to: " << filename << std::endl;
+    
+    // Write source point as separate VTK file
+    writeVTKSourcePoint(x0, y0, filename);
+}
+
+// ============================================================
+// VTK SOURCE POINT OUTPUT
+// ============================================================
+void EikonSolver2D::writeVTKSourcePoint(double x0, double y0, const std::string& grid_filename) {
+    // Derive source filename from grid filename
+    std::string source_filename = grid_filename;
+    size_t pos = source_filename.find("_grid.vtk");
+    if (pos != std::string::npos) {
+        source_filename.replace(pos, 9, "_source.vtk");
+    } else {
+        source_filename = "source_point.vtk";
+    }
+    
+    std::ofstream vtk_file(source_filename);
+    if (!vtk_file.is_open()) {
+        std::cerr << "Error: Could not open " << source_filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    vtk_file << "# vtk DataFile Version 3.0\n";
+    vtk_file << "Source Point\n";
+    vtk_file << "ASCII\n";
+    vtk_file << "DATASET POLYDATA\n";
+    vtk_file << "POINTS 1 float\n";
+    vtk_file << x0 << " " << y0 << " 0.0\n";
+    vtk_file << "POINT_DATA 1\n";
+    vtk_file << "SCALARS Source int 1\n";
+    vtk_file << "LOOKUP_TABLE default\n";
+    vtk_file << "1\n";
+    
+    vtk_file.close();
+    std::cout << "VTK source point written to: " << source_filename << std::endl;
+}
+
+// ============================================================
+// GMSH OUTPUT FUNCTION (.msh format)
+// ============================================================
+void EikonSolver2D::writeGmshGrid(
+    const Eigen::VectorXd& xx,
+    const Eigen::VectorXd& yy,
+    const Eigen::MatrixXd& X,
+    const Eigen::MatrixXd& Y,
+    const Eigen::MatrixXd& T0,
+    const Eigen::MatrixXd& T0x,
+    const Eigen::MatrixXd& T0y,
+    double x0, double y0,
+    const std::string& filename
+) {
+    int nx = xx.size();
+    int ny = yy.size();
+    int npoints = nx * ny;
+    
+    std::ofstream msh_file(filename);
+    if (!msh_file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    // Gmsh ASCII format header
+    msh_file << "$MeshFormat\n";
+    msh_file << "2.2 0 8\n";
+    msh_file << "$EndMeshFormat\n";
+    
+    // Write nodes
+    msh_file << "$Nodes\n";
+    msh_file << npoints << "\n";
+    int node_id = 1;
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            msh_file << node_id++ << " " << X(i, j) << " " << Y(i, j) << " 0.0\n";
+        }
+    }
+    msh_file << "$EndNodes\n";
+    
+    // Write elements (quads)
+    msh_file << "$Elements\n";
+    int nelem = (nx - 1) * (ny - 1);
+    msh_file << nelem << "\n";
+    int elem_id = 1;
+    for (int j = 0; j < ny - 1; ++j) {
+        for (int i = 0; i < nx - 1; ++i) {
+            // Quad element: type 3 (4-node quad)
+            int n1 = j * nx + i + 1;
+            int n2 = j * nx + (i + 1) + 1;
+            int n3 = (j + 1) * nx + (i + 1) + 1;
+            int n4 = (j + 1) * nx + i + 1;
+            msh_file << elem_id++ << " 3 2 0 0 " << n1 << " " << n2 << " " << n3 << " " << n4 << "\n";
+        }
+    }
+    msh_file << "$EndElements\n";
+    
+    // Write nodal data (T0, T0x, T0y)
+    msh_file << "$NodeData\n";
+    msh_file << "3\n";  // Number of fields: T0, T0x, T0y
+    msh_file << "\"T0\"\n";
+    msh_file << "1\n";  // Real data
+    msh_file << "0.0\n";  // Time
+    msh_file << "3\n";  // 3 components (scalar)
+    msh_file << npoints << "\n";
+    node_id = 1;
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            msh_file << node_id++ << " " << T0(i, j) << "\n";
+        }
+    }
+    
+    msh_file << "\"T0x\"\n";
+    msh_file << "1\n";
+    msh_file << "0.0\n";
+    msh_file << "3\n";
+    msh_file << npoints << "\n";
+    node_id = 1;
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            msh_file << node_id++ << " " << T0x(i, j) << "\n";
+        }
+    }
+    
+    msh_file << "\"T0y\"\n";
+    msh_file << "1\n";
+    msh_file << "0.0\n";
+    msh_file << "3\n";
+    msh_file << npoints << "\n";
+    node_id = 1;
+    for (int j = 0; j < ny; ++j) {
+        for (int i = 0; i < nx; ++i) {
+            msh_file << node_id++ << " " << T0y(i, j) << "\n";
+        }
+    }
+    msh_file << "$EndNodeData\n";
+    
+    msh_file.close();
+    std::cout << "Gmsh grid written to: " << filename << std::endl;
+    
+    // Write source point as separate Gmsh file
+    writeGmshSourcePoint(x0, y0, filename);
+}
+
+// ============================================================
+// GMSH SOURCE POINT OUTPUT
+// ============================================================
+void EikonSolver2D::writeGmshSourcePoint(double x0, double y0, const std::string& grid_filename) {
+    // Derive source filename from grid filename
+    std::string source_filename = grid_filename;
+    size_t pos = source_filename.find("_grid.msh");
+    if (pos != std::string::npos) {
+        source_filename.replace(pos, 9, "_source.msh");
+    } else {
+        source_filename = "source_point.msh";
+    }
+    
+    std::ofstream msh_file(source_filename);
+    if (!msh_file.is_open()) {
+        std::cerr << "Error: Could not open " << source_filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    msh_file << "$MeshFormat\n";
+    msh_file << "2.2 0 8\n";
+    msh_file << "$EndMeshFormat\n";
+    
+    msh_file << "$Nodes\n";
+    msh_file << "1\n";
+    msh_file << "1 " << x0 << " " << y0 << " 0.0\n";
+    msh_file << "$EndNodes\n";
+    
+    msh_file << "$Elements\n";
+    msh_file << "1\n";
+    msh_file << "1 15 2 0 0 1\n";  // Point element (type 15)
+    msh_file << "$EndElements\n";
+    
+    msh_file << "$NodeData\n";
+    msh_file << "1\n";
+    msh_file << "\"Source\"\n";
+    msh_file << "1\n";
+    msh_file << "0.0\n";
+    msh_file << "3\n";
+    msh_file << "1\n";
+    msh_file << "1 1.0\n";
+    msh_file << "$EndNodeData\n";
+    
+    msh_file.close();
+    std::cout << "Gmsh source point written to: " << source_filename << std::endl;
+}
+
+// ============================================================
+// OPTIONAL: Write source curve (if you have a curve, not a point)
+// ============================================================
+void EikonSolver2D::writeVTKSourceCurve(
+    const std::vector<Eigen::Vector2d>& curve_points,
+    const std::string& filename
+) {
+    std::ofstream vtk_file(filename);
+    if (!vtk_file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << " for writing!" << std::endl;
+        return;
+    }
+    
+    vtk_file << "# vtk DataFile Version 3.0\n";
+    vtk_file << "Source Curve\n";
+    vtk_file << "ASCII\n";
+    vtk_file << "DATASET POLYDATA\n";
+    vtk_file << "POINTS " << curve_points.size() << " float\n";
+    
+    for (const auto& pt : curve_points) {
+        vtk_file << pt(0) << " " << pt(1) << " 0.0\n";
+    }
+    
+    vtk_file << "LINES 1 " << curve_points.size() + 1 << "\n";
+    vtk_file << curve_points.size();
+    for (size_t i = 0; i < curve_points.size(); ++i) {
+        vtk_file << " " << i;
+    }
+    vtk_file << "\n";
+    
+    vtk_file.close();
+    std::cout << "VTK source curve written to: " << filename << std::endl;
 }
