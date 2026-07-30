@@ -1,7 +1,7 @@
 #include "polygon_utils.hpp"
 #include <algorithm>
 #include <limits>
-
+#include <set>
 Point2D Polygon2D::centroid() const {
     if (vertices.empty()) return Point2D(0, 0);
     double cx = 0.0, cy = 0.0;
@@ -10,6 +10,13 @@ Point2D Polygon2D::centroid() const {
         cy += p.y;
     }
     return Point2D(cx / vertices.size(), cy / vertices.size());
+}
+Point2D Polygon2D::getVertex(int idx) const
+{
+    if (idx >= 0 &&idx<static_cast<int>(vertices.size()))
+     return vertices[idx];
+    static Point2D defaultPoint(0, 0, -1);
+    return defaultPoint;
 }
 
 void Polygon2D::boundingBox(double& xmin, double& xmax, 
@@ -40,6 +47,45 @@ double Polygon2D::area() const {
     return 0.5 * a;
 }
 
+void Polygon2D::extractEdgesFromFaces() {
+    bool test=false;
+    edges.clear();
+    int nextEdgeId = 0;
+        
+    std::set<std::pair<int, int>> edgeSet;
+        
+    for (const auto& face : faces) {
+        if(test) {
+          std::cout<<" faceVert="<<face.face.size();
+          for (size_t i = 0; i < face.face.size(); ++i)
+           std::cout<<" "<<face.face[i];
+          std::cout<<std::endl;
+        }
+
+        for (size_t i = 0; i < face.face.size(); ++i) {
+
+            int v1 = face.face[i];
+            int v2 = face.face[(i + 1) % face.face.size()];
+                
+            // Ensure consistent ordering
+            if (v1 > v2) 
+               std::swap(v1, v2);
+            if (v1<0|| v2<0) {
+               std::cout<<" BAD EDGE v1="<<v1<<" v2="<<v2<<std::endl;
+            continue;
+            }    
+            // Use a set to avoid duplicates
+            if (edgeSet.find({v1, v2}) == edgeSet.end()) {
+               edgeSet.insert({v1, v2});
+               edges.push_back(Edge(nextEdgeId++, v1, v2));
+               if (test) {
+                 std::cout<<" EDGE_ID="<<nextEdgeId
+                  << "("<<v1<<","<<v2<<")"<<std::endl;
+               }
+            }
+        }
+    }
+}
 double Polygon2D::distanceToBoundary(const Point2D& p) const {
     if (vertices.size() < 3) {
         return std::numeric_limits<double>::infinity();

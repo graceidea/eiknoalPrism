@@ -5,7 +5,11 @@
 #include <string>
 #include <vector>
 #include <iomanip>
-Polygon2D readOBJFile(const std::string& filename) {
+#include <set>
+#include <map>
+Polygon2D readOBJFile(const std::string& filename) 
+{
+    bool test=false;
     Polygon2D poly;
     std::ifstream file(filename);
     std::cout<<"  Polygon2D::readOBJFile"<<std::endl;
@@ -16,7 +20,7 @@ Polygon2D readOBJFile(const std::string& filename) {
     
     std::string line;
     std::vector<Point2D> all_points;
-    std::vector<std::vector<int>> faces;
+    //std::vector<std::vector<int>> faces;
     
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
@@ -31,7 +35,8 @@ Polygon2D readOBJFile(const std::string& filename) {
             all_points.push_back(Point2D(x, y));
         }
         else if (prefix == "f") {
-            std::vector<int> face;
+            
+            Face f;f.face.clear();
             std::string token;
             while (iss >> token) {
                 std::string v_str = token;
@@ -41,26 +46,66 @@ Polygon2D readOBJFile(const std::string& filename) {
                 }
                 if (!v_str.empty()) {
                     int idx = std::stoi(v_str) - 1;
-                    face.push_back(idx);
+                    if (idx >= 0 && idx < static_cast<int>(all_points.size())) 
+                    {
+                      if (test) std::cout<<" idx="<<idx;
+                      f.face.push_back(idx);
+                    }
+                    else if (test) std::cout<<"  f.face.size="<<f.face.size();
                 }
             }
-            if (!face.empty()) {
-                faces.push_back(face);
+            if (test)std::cout<<std::endl;
+            if (!f.face.empty()) {
+                if (test) {
+                  std::cout<<" faceVert1="<<f.face.size();
+                  for (size_t i = 0; i < f.face.size(); ++i)
+                    std::cout<<" "<<f.face[i];
+                  std::cout<<std::endl;
+                }
+                poly.faces.push_back(f);
             }
         }
     }
     file.close();
     
-    if (!faces.empty() && !all_points.empty()) {
-        const auto& face = faces[0];
-        for (int idx : face) {
-            if (idx >= 0 && idx < (int)all_points.size()) {
-                poly.vertices.push_back(all_points[idx]);
+    if (!poly.faces.empty() && !all_points.empty()) {
+        std::set<int> usedVertices;
+        for (const auto& face : poly.faces) {
+            for (int idx : face.face) {
+                if (idx >= 0 && idx < static_cast<int>(all_points.size())) {
+                    usedVertices.insert(idx);
+                }
             }
         }
+        // Add vertices to polygon
+        for (int idx : usedVertices) {
+            Point2D p = all_points[idx];
+            p.id = static_cast<int>(poly.vertices.size());
+            poly.vertices.push_back(p);
+            //poly.addVertex(p);
+        }
+        // Store faces with remapped vertex indices
+        std::map<int, int> indexMap;
+        for (size_t i = 0; i < poly.vertices.size(); ++i) {
+            // Need to map original indices to new indices
+            for (const auto& face : poly.faces) {
+                for (int idx : face.face) {
+                    if (idx == static_cast<int>(i)) {
+                        indexMap[i] = static_cast<int>(poly.vertices.size()) - 1;
+                    }
+                }
+            }
+        }
+         
+        // Extract edges from faces
+        poly.extractEdgesFromFaces();
+        
+        std::cout << "  Loaded " << all_points.size() << " vertices, "
+                  <<poly.vertices.size()<<" polyVerts, "
+                  << poly.faces.size() << " faces, face[0] has "
+                  <<poly.faces[0].face.size()<<" Verts "
+                  << poly.edges.size() << " edges\n";    
     }
-    
-    //std::cout << "Read " << poly.vertices.size() << " vertices from " << filename << std::endl;
     return poly;
 }
 

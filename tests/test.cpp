@@ -10,7 +10,7 @@
 #include "polygon_utils.hpp"
 #include "cartesianMesh_utils.hpp"
 #include "io_utils.hpp"
-
+#include "prismMesh_utils.hpp"
 
 int main(int argc, char** argv) {
     //1, readin input polygon as initial source
@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
         obj_filename = argv[1];
     }
     Polygon2D poly;
-    readInputPolygon(obj_filename,poly);//,grid);
+    readInputPolygon(obj_filename,poly);//
   
     //2, compute background cartisian grid
     Grid grid;
@@ -31,12 +31,16 @@ int main(int argc, char** argv) {
     Eigen::VectorXd yy = Eigen::VectorXd::LinSpaced(grid.ny, grid.ymin, grid.ymax);         
     computeDistance(poly,T_exact,xx,yy,grid);
    
-    //3, write outputs
+    PrismMesh2D pm;
+    int numlayer=4;
+    std::vector<double> dis;
+    for (int i=0;i<numlayer;++i)
+      dis.push_back(0.1*i);
+    pm.createVerts(poly, numlayer,dis);
+    pm.writeMSH("prismMesh.msh");
+
+    //5, write outputs
     writeOutput(poly, grid, T_exact,xx, yy);   
-    Vector2D norm;
-    for (unsigned i=0;i<poly.vertices.size();++i) {
-     norm=poly.compute_node_normal(i);
-     norm.print();
-    }
+
     return 0;
 }
