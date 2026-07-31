@@ -12,3 +12,10 @@ git@github.com:graceidea/eiknoalPrism.git
 
 <img width="530" height="532" alt="image" src="https://github.com/user-attachments/assets/ba4d7b17-d050-4af9-8cf4-bfb7cf9b7eb0" />
 
+4, Gradient of Distance function
+
+<img width="529" height="533" alt="image" src="https://github.com/user-attachments/assets/bbf6c3c2-ff62-4d83-ac45-c895d6ec39a6" />
+
+5, 
+
+
