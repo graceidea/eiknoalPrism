@@ -44,7 +44,7 @@ public:
                           const std::vector<double>& extrudeDistances,
                           double topOffset = 0.0);
     void createVerts(Polygon2D& poly, int numlayer, std::vector<double>& dis);
-    
+    void createEdges(Polygon2D& poly, int numlayer);
   
     // File I/O
     void writeMSH(const std::string& filename) const;
@@ -89,7 +89,7 @@ private:
     std::vector<Edge> edges;
     std::map<int,std::vector<int>> e2e;
     std::map<int,std::vector<int>> e2f;
-    
+    std::vector<Face> faces;
 
     std::vector<std::vector<int>> prisms;
     std::vector<Edge> boundaryEdges;

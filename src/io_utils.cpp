@@ -7,6 +7,34 @@
 #include <iomanip>
 #include <set>
 #include <map>
+
+void readInputPolygon(std::string obj_filename,Polygon2D& poly)
+{
+    std::cout << "==========================================" << std::endl;
+    std::cout << "  1. READ INPUT CLOSED CURVE FROM OBJ FILE" << std::endl;
+    std::cout << "==========================================" << std::endl;
+    
+    obj_filename = "input.obj";     
+    std::cout << "  Reading polygon from: " << obj_filename << std::endl;
+ 
+    // Check if file exists
+    std::ifstream file_check(obj_filename);
+    if (!file_check.good()) {
+        std::cerr << "Error: Cannot open file " << obj_filename << std::endl;
+        return;
+    }
+    file_check.close();
+    poly = readOBJFile(obj_filename);
+    
+    if (poly.vertices.size() < 3) {
+        std::cerr << "Error: Invalid polygon (need at least 3 vertices)" << std::endl;
+        return;
+    }
+    //std::cout << "\n=== Parameters ===" << std::endl;
+    std::cout << "  Polygon vertices: " << poly.vertices.size() << std::endl;
+    std::cout << "  Polygon area: " << poly.area() << std::endl;    
+}       
+
 Polygon2D readOBJFile(const std::string& filename) 
 {
     bool test=false;
@@ -20,8 +48,7 @@ Polygon2D readOBJFile(const std::string& filename)
     
     std::string line;
     std::vector<Point2D> all_points;
-    //std::vector<std::vector<int>> faces;
-    
+
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') continue;
         
@@ -34,9 +61,9 @@ Polygon2D readOBJFile(const std::string& filename)
             iss >> x >> y >> z;
             all_points.push_back(Point2D(x, y));
         }
-        else if (prefix == "f") {
-            
-            Face f;f.face.clear();
+        else if (prefix == "f") {           
+            Face f;
+            f.vertices.clear();
             std::string token;
             while (iss >> token) {
                 std::string v_str = token;
@@ -49,21 +76,49 @@ Polygon2D readOBJFile(const std::string& filename)
                     if (idx >= 0 && idx < static_cast<int>(all_points.size())) 
                     {
                       if (test) std::cout<<" idx="<<idx;
-                      f.face.push_back(idx);
+                      f.vertices.push_back(idx);
                     }
-                    else if (test) std::cout<<"  f.face.size="<<f.face.size();
+                    //else if (test) std::cout<<"  f.vertices.size="<<f.vertices.size();
                 }
             }
+            test=true;
             if (test)std::cout<<std::endl;
-            if (!f.face.empty()) {
+            if (!f.vertices.empty()) {
                 if (test) {
-                  std::cout<<" faceVert1="<<f.face.size();
-                  for (size_t i = 0; i < f.face.size(); ++i)
-                    std::cout<<" "<<f.face[i];
-                  std::cout<<std::endl;
+                  std::cout<<" faceVert1="<<f.vertices.size()<<"(";
+                  for (size_t ii = 0; ii < f.vertices.size(); ++ii)
+                    std::cout<<" "<<f.vertices[ii];
+                  std::cout<<")"<<std::endl;
                 }
                 poly.faces.push_back(f);
+
+                // Generate edges for this face and add to poly.edges
+                for (size_t i = 0; i < f.vertices.size(); ++i) {
+                    int v1 = f.vertices[i];
+                    int v2 = f.vertices[(i + 1) % f.vertices.size()]; // Wrap around to close the polygon
+                    
+                    // Create edge with unique ID (you can use poly.edges.size() as ID)
+                    Edge newEdge(v1, v2, poly.edges.size());
+                    
+                    // Check if this edge already exists (avoid duplicates)
+                    bool edgeExists = false;
+                    for (const auto& existingEdge : poly.edges) {
+                        if (existingEdge == newEdge) {
+                            edgeExists = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!edgeExists) {
+                        poly.edges.push_back(newEdge);
+                        if (test) {
+                            std::cout << "Added edge: ";
+                            newEdge.print();
+                        }
+                    }
+                }
             }
+            test=false;
         }
     }
     file.close();
@@ -71,7 +126,7 @@ Polygon2D readOBJFile(const std::string& filename)
     if (!poly.faces.empty() && !all_points.empty()) {
         std::set<int> usedVertices;
         for (const auto& face : poly.faces) {
-            for (int idx : face.face) {
+            for (int idx : face.vertices) {
                 if (idx >= 0 && idx < static_cast<int>(all_points.size())) {
                     usedVertices.insert(idx);
                 }
@@ -82,14 +137,13 @@ Polygon2D readOBJFile(const std::string& filename)
             Point2D p = all_points[idx];
             p.id = static_cast<int>(poly.vertices.size());
             poly.vertices.push_back(p);
-            //poly.addVertex(p);
         }
         // Store faces with remapped vertex indices
         std::map<int, int> indexMap;
         for (size_t i = 0; i < poly.vertices.size(); ++i) {
             // Need to map original indices to new indices
             for (const auto& face : poly.faces) {
-                for (int idx : face.face) {
+                for (int idx : face.vertices) {
                     if (idx == static_cast<int>(i)) {
                         indexMap[i] = static_cast<int>(poly.vertices.size()) - 1;
                     }
@@ -98,12 +152,12 @@ Polygon2D readOBJFile(const std::string& filename)
         }
          
         // Extract edges from faces
-        poly.extractEdgesFromFaces();
+        //poly.extractEdgesFromFaces();
         
         std::cout << "  Loaded " << all_points.size() << " vertices, "
                   <<poly.vertices.size()<<" polyVerts, "
                   << poly.faces.size() << " faces, face[0] has "
-                  <<poly.faces[0].face.size()<<" Verts "
+                  <<poly.faces[0].vertices.size()<<" Verts "
                   << poly.edges.size() << " edges\n";    
     }
     return poly;

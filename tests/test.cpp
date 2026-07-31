@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
         obj_filename = argv[1];
     }
     Polygon2D poly;
-    readInputPolygon(obj_filename,poly);//
+    readInputPolygon(obj_filename,poly);//poly vertices/edges
   
     //2, compute background cartisian grid
     Grid grid;
@@ -32,11 +32,12 @@ int main(int argc, char** argv) {
     computeDistance(poly,T_exact,xx,yy,grid);
    
     PrismMesh2D pm;
-    int numlayer=4;
+    int numlayer=5;
     std::vector<double> dis;
     for (int i=0;i<numlayer;++i)
-      dis.push_back(0.1*i);
+      dis.push_back(0.4*(i+1));
     pm.createVerts(poly, numlayer,dis);
+    pm.createEdges(poly,numlayer);
     pm.writeMSH("prismMesh.msh");
 
     //5, write outputs

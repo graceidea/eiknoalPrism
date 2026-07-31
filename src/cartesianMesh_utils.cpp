@@ -13,32 +13,7 @@
 #else
     #define OMP_PARALLEL_FOR
 #endif
-void readInputPolygon(std::string obj_filename,Polygon2D& poly)//,Grid& grid)
-{
-    std::cout << "==========================================" << std::endl;
-    std::cout << "  1. READ INPUT CLOSED CURVE FROM OBJ FILE" << std::endl;
-    std::cout << "==========================================" << std::endl;
-    
-    obj_filename = "input.obj";  
-    
-    std::cout << "  Reading polygon from: " << obj_filename << std::endl;
-    // Check if file exists
-    std::ifstream file_check(obj_filename);
-    if (!file_check.good()) {
-        std::cerr << "Error: Cannot open file " << obj_filename << std::endl;
-        return;
-    }
-    file_check.close();
-    poly = readOBJFile(obj_filename);
-    
-    if (poly.vertices.size() < 3) {
-        std::cerr << "Error: Invalid polygon (need at least 3 vertices)" << std::endl;
-        return;
-    }
-    //std::cout << "\n=== Parameters ===" << std::endl;
-    std::cout << "  Polygon vertices: " << poly.vertices.size() << std::endl;
-    std::cout << "  Polygon area: " << poly.area() << std::endl;    
-}       
+
 
 void computeGridParameters(const Polygon2D& poly, Grid& grid) 
 {

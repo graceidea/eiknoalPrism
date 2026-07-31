@@ -46,7 +46,7 @@ double Polygon2D::area() const {
     }
     return 0.5 * a;
 }
-
+/*
 void Polygon2D::extractEdgesFromFaces() {
     bool test=false;
     edges.clear();
@@ -56,20 +56,20 @@ void Polygon2D::extractEdgesFromFaces() {
         
     for (const auto& face : faces) {
         if(test) {
-          std::cout<<" faceVert="<<face.face.size();
-          for (size_t i = 0; i < face.face.size(); ++i)
-           std::cout<<" "<<face.face[i];
+          std::cout<<" faceVert="<<face.vertices.size();
+          for (size_t i = 0; i < face.vertices.size(); ++i)
+           std::cout<<" "<<face.vertices[i];
           std::cout<<std::endl;
         }
 
-        for (size_t i = 0; i < face.face.size(); ++i) {
+        for (size_t i = 0; i < face.vertices.size(); ++i) {
 
-            int v1 = face.face[i];
-            int v2 = face.face[(i + 1) % face.face.size()];
+            int v1 = face.vertices[i];
+            int v2 = face.vertices[(i + 1) % face.vertices.size()];
                 
             // Ensure consistent ordering
-            if (v1 > v2) 
-               std::swap(v1, v2);
+            //if (v1 > v2) 
+             //  std::swap(v1, v2);
             if (v1<0|| v2<0) {
                std::cout<<" BAD EDGE v1="<<v1<<" v2="<<v2<<std::endl;
             continue;
@@ -86,6 +86,7 @@ void Polygon2D::extractEdgesFromFaces() {
         }
     }
 }
+    */
 double Polygon2D::distanceToBoundary(const Point2D& p) const {
     if (vertices.size() < 3) {
         return std::numeric_limits<double>::infinity();

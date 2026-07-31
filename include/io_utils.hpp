@@ -6,6 +6,7 @@
 #include "polygon_utils.hpp"
 
 // Read OBJ file
+void readInputPolygon(std::string obj_filename,Polygon2D& poly);
 Polygon2D readOBJFile(const std::string& filename);
 
 // Write grid

@@ -10,6 +10,8 @@ struct Point2D {
     Point2D(double x_ = 0.0, double y_ = 0.0, int id_=-1) 
      : x(x_), y(y_), id(id_) {}
     void setId(int id_) {id=id_;}
+    int getId() const {return id;}
+    void print() const{ std::cout<<"  ptID="<<id<<"("<<x<<","<<y<<")"<<std::endl;}
     double distanceTo(const Point2D& other) const {
         double dx = x - other.x;
         double dy = y - other.y;
@@ -78,15 +80,23 @@ struct Face {
     int v1, v2, v3;     // Declared first
     int e1, e2, e3;
     int id;         // Declared second
-    std::vector<int> face;
+    std::vector<int> vertices;
     // Initializer list should match declaration order: v1, v2, id
     Face(int v1_ = -1, int v2_ = -1, int v3_=-1,int i = -1) 
       : v1(v1_), v2(v2_), v3(v3_), id(i) {
-        face.push_back(v1);
-        face.push_back(v2);
-        face.push_back(v3);
+        vertices.push_back(v1);
+        vertices.push_back(v2);
+        vertices.push_back(v3);
       }
     
+    void setFace(int id_, std::vector<int>& fv) {
+        id=id_;
+        for (unsigned i=0;i<fv.size();++i) {
+         if (fv[i]>=0)     vertices.push_back(fv[i]);
+         else std::cout<<"ERROR: faceid "<<fv[i]<<std::endl;
+        }
+    }
+    void setFace(int v){ if (v>=0) vertices.push_back(v);}
     bool operator==(const Face& other) const {
         return (v1 == other.v1 && v2 == other.v2) || 
                (v1 == other.v2 && v2 == other.v1);
@@ -144,7 +154,7 @@ struct Polygon2D {
     bool isValid() const;
     size_t numEdges() const { return vertices.size(); }
     double perimeter() const;   
-    void extractEdgesFromFaces();
+    //void extractEdgesFromFaces();
     Vector2D compute_node_normal(size_t index) const;
 private:
     // Helper for point-to-segment distance

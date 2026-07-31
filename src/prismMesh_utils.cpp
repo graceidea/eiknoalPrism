@@ -1,5 +1,6 @@
 // PrismMesh2D.cpp
 #include "prismMesh_utils.hpp"
+#include "io_utils.hpp"
 #include <sstream>
 #include <iomanip>
 #include <type_traits>
@@ -20,10 +21,9 @@ void PrismMesh2D::clear() {
 void PrismMesh2D::createVerts(Polygon2D& poly, int numlayer, std::vector<double>& dis)
 {
     std::cout<<"\n======================================"<<std::endl;
-    std::cout<<"    4. GENERATE PRISM MESH"<<std::endl;
+    std::cout<<"    4.1. GENERATE PRISM MESH (Verts)"<<std::endl;
     std::cout<<"======================================"<<std::endl;
     bool test=false;
-    vertices.clear();
     if (numlayer<1 || dis.empty()) {
         std::cout<<" WARNING::numlayer="<<numlayer
             <<" disFunc="<<dis.size()<<std::endl;
@@ -34,30 +34,133 @@ void PrismMesh2D::createVerts(Polygon2D& poly, int numlayer, std::vector<double>
            <<numlayer<<std::endl;
         return;
     }
-    Vector2D norm;
 
-    for(unsigned j=0;j<static_cast<unsigned>(numlayer);++j) {
+    Vector2D norm;
+    vertices.clear();
+    edges.clear();
+    if (test) {
+     for (int i=0;i<numlayer;++i) 
+        std::cout<<" dis="<<dis[i]<<" ";
+    }
+    std::cout<<std::endl;
+    for(unsigned j=0;j<=static_cast<unsigned>(numlayer);++j) {
       Point2D newp;
       for (unsigned i=0;i<poly.vertices.size();++i) {
         norm=poly.compute_node_normal(i);
         if (test) norm.print();
 
-        v2v[static_cast<int>(vertices.size())].push_back(numlayer);
-        Point2D pt = getVertex(i);
-        vertices.push_back(pt);
-     
+        Point2D pt;
+        int newid=i+static_cast<int>(poly.vertices.size())*j;
+        v2v[i].push_back(newid);
+        
+        if (j==0) {         
+         pt = poly.getVertex(i);
+         pt.setId(newid);
+         vertices.push_back(pt);
+         continue;
+        } 
+        else {
+          pt=vertices[newid-static_cast<int>(poly.vertices.size())];
+          if (test) {
+            std::cout<<" v1= ";pt.print();
+          }
+        }
         Point2D newPT;
-        newPT.x=pt.x+norm.x*dis[j];
-        newPT.y=pt.y+norm.y*dis[j];
-        newPT.setId(vertices.size());
+        newPT.x=pt.x+norm.x*dis[j-1];       
+        newPT.y=pt.y+norm.y*dis[j-1];
+        newPT.setId(newid);
         vertices.push_back(newPT);
+
         poly.setVertex(newPT,i);//reset poly vert
-        Edge edge(edges.size(),vertices.size()-2,vertices.size()-1);
+        Edge edge(pt.getId(),newPT.getId(),edges.size());
+        v2e[i].push_back(edges.size());
         edges.push_back(edge);
-     }     
+        
+        if (test)edge.print();
+     }  //end of polyVertices loop
+
+     if (test) {
+        std::ostringstream oss;
+        oss << "poly" << j<<".msh";     
+        const std::string filename = oss.str();
+        std::cout<<"write out "<<filename<<std::endl;
+        writePolygonGmsh(poly, filename) ; 
+     }
     }
-    this->printVector(vertices,"vertices");
-    this->printVector(edges,"edges");
+    if (test) {
+      this->printVector(vertices,"vertices");
+      this->printVector(edges,"edges");
+    }
+    std::cout<<"CreateVerts:: Total Edges= "<<edges.size()
+        <<" Total Verts="<<vertices.size()<<std::endl;
+}
+void PrismMesh2D::createEdges(Polygon2D& poly, int numlayer)
+{
+    std::cout<<"\n======================================"<<std::endl;
+    std::cout<<" 4.2. GENERATE PRISM MESH (Edges/Faces)"<<std::endl;
+    std::cout<<"======================================"<<std::endl;
+    bool test=true;
+
+    faces.clear();
+    if (numlayer<1 ) {
+        std::cout<<" WARNING::numlayer="<<numlayer<<std::endl;
+        return;
+    }
+    if (vertices.empty()||edges.empty()) {
+        std::cout<<"vertices.size = "<<vertices.size()
+            <<" edges.size="<<edges.size()<<std::endl;
+        return;
+    }
+    if (test) {
+      for (unsigned i=0;i<poly.edges.size();++i) {
+        std::cout<<"POLY.EDGE="<<i<<"("<<poly.edges[i].v1
+          <<","<<poly.edges[i].v2<<")"<<std::endl;
+      }
+    }
+    for (unsigned i=0;i<poly.edges.size();++i) {
+      Edge &e=poly.edges[i];
+      std::vector<int> &vEdge1=v2v[e.v1];
+      std::vector<int> &vEdge2=v2v[e.v2];       
+      std::cout<<std::endl<<"POLY edge=("<<e.v1<<","<<e.v2<<std::endl;
+
+      for (int j=0;j<=numlayer;++j) {
+        int eid=static_cast<int>(edges.size());       
+        Edge edgeB(vEdge1[j],vEdge2[j],eid);
+        if (test) 
+          std::cout<<"   "<<j<<"th edgeB("<<vEdge1[j]<<","<<vEdge2[j]<<")" <<std::endl;
+        edges.push_back(edgeB);
+        e2e[i].push_back(eid);
+        if (j==0) continue;
+
+        //create face
+        Edge &edgeT=edges[e2e[i][e2e[i].size()-1]];
+        if (test) std::cout<<"   edgeT("<<edgeT.v1<<","<<edgeT.v2<<")"<<std::endl;
+        //edges.push_back(edgeT);
+
+        Face f; f.vertices.clear();
+        f.vertices.push_back(vEdge1[j-1]);
+        f.vertices.push_back(vEdge2[j-1]);
+        f.vertices.push_back(vEdge2[j]);
+        f.vertices.push_back(vEdge1[j]);
+        f.id=static_cast<int>(faces.size());
+        if (test) {
+          std::cout<<" Face="<<f.id<<"(";
+          for (unsigned kk=0;kk<f.vertices.size();++kk)
+           std::cout<<" "<<f.vertices[kk];
+          std::cout<<std::endl;
+          faces.push_back(f);
+        }
+      }
+    }
+    if (test) {
+        this->printVector(edges,"polygon.edges");
+        this->printVector(faces,"polygon.faces");
+    }
+        //std::cout<<"WRITE OUT prism.msh"<<std::endl;
+        this->writeMSH("prism.msh");
+    
+    std::cout<<" CreateEdges: Total Edges= "<<edges.size()
+        <<" Total Faces="<<faces.size()<<std::endl;
 }
 int PrismMesh2D::addVertex(const Point2D& point) {
     Point2D newPoint = point;
@@ -294,6 +397,11 @@ void PrismMesh2D::printVector(const std::vector<T>& vec,
     }
 }
 void PrismMesh2D::writeMSH(const std::string& filename) const {
+    bool test=true;
+    if (test) {
+      std::cout<<"Write prism.msh file"<<std::endl;
+      std::cout<<"  verts="<<vertices.size()<<" faces="<<faces.size()<<std::endl;
+    }
     std::ofstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Could not open file: " + filename);
@@ -315,28 +423,31 @@ void PrismMesh2D::writeMSH(const std::string& filename) const {
     
     // Write elements
     file << "$Elements\n";
-    int totalElements = prisms.size() + boundaryEdges.size();
+    int totalElements = faces.size();//prisms.size() + boundaryEdges.size();
     file << totalElements << "\n";
     
     int elementId = 1;
     // Write prism elements
-    for (const auto& prism : prisms) {
-        file << elementId << " 6 2 1 1";  // Element type 6 = hexahedron
-        for (int v : prism) {
+    for (const auto& face : faces) {//prisms) {
+        file << elementId << " 3 2 1 1 ";  // Element type 6 = hexahedron, 3=quad
+        std::cout<<" fv="<<face.vertices.size()<<": ";
+        for (int v : face.vertices) {
             file << " " << (v + 1);
+            std::cout<<v+1<<" ";
         }
         file << "\n";
+        std::cout<<std::endl;
         elementId++;
     }
-    
+    /*
     // Write boundary edges
-    for (const auto& edge : boundaryEdges) {
+    for (const auto& edge : edges) {//boundaryEdges) {
         file << elementId << " 1 2 1 1";  // Element type 1 = line
         file << " " << (edge.v1 + 1) << " " << (edge.v2 + 1);
         file << "\n";
         elementId++;
     }
-    
+    */
     file << "$EndElements\n";
     file.close();
 }
