@@ -18,6 +18,9 @@ git@github.com:graceidea/eiknoalPrism.git
 
 5, Prism mesh of generated from the closed polygon
 
+<img width="505" height="534" alt="image" src="https://github.com/user-attachments/assets/2c1f973c-178f-4e40-9a9a-59cc7c8848ab" />
+
+
 <img width="496" height="516" alt="image" src="https://github.com/user-attachments/assets/23e086e6-736f-49c8-8af1-c0938c9d394f" />
 
 
