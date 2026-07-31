@@ -4,9 +4,6 @@ git@github.com:graceidea/eiknoalPrism.git
 
 <img width="573" height="567" alt="image" src="https://github.com/user-attachments/assets/60c52924-c825-404e-9e0e-464f4000b77d" />
 
-<img width="688" height="703" alt="image" src="https://github.com/user-attachments/assets/a599f4a4-a2b3-49fe-8621-0a75eecd05ad" />
-
-
 2, background Cartesian Grid and Source Function
 
 <img width="547" height="550" alt="image" src="https://github.com/user-attachments/assets/3de02070-47e9-49e8-b4d7-212434b02843" />
