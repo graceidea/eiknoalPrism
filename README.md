@@ -1,4 +1,4 @@
-https://github.com/graceidea/eikonalPrism.git
+git@github.com:graceidea/eiknoalPrism.git
 
 1, Shape of original source function (a closed polygon)
 
