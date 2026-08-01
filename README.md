@@ -37,9 +37,6 @@ mkdir build && cd build
 cmake ..
 make -j\$(nproc)
 
-# Run tests
-cd bin/
-./test
 ```
 
 ## ⚙️ Pipeline
@@ -59,7 +56,9 @@ The `eikonalPrism` engine executes a 5-step geometric and differential pipeline 
 Run the main executable from the build directory by passing your input geometric configuration file or object:
 
 ```bash
-./bin/eikonalPrism path/to/input.obj
+# Run tests
+cd bin/
+./test
 ```
 
 ## 📂 Expected Output Files
