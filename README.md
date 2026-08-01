@@ -1,3 +1,125 @@
+# EikonalPrism [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![C++](https://img.shields.io/badge/C++-17-blue.svg)](https://isocpp.org/) [![CMake](https://img.shields.io/badge/CMake-3.10+-green.svg)](https://cmake.org/)
+
+A modern C++ implementation for processing Source Functions (SF) using the Eikonal equation to generate distance fields and prism meshes.
+
+## 📋 Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [Pipeline](#%EF%B8%8F-pipeline)
+- [Usage](#-usage)
+- [Expected Output Files](#-expected-output-files)
+- [Visualization](#-visualization)
+- [Dependencies](#-dependencies)
+- [License](#-license)
+
+## ✨ Features
+- **Source Function Processing**: Read closed polygon representations of Source Functions.
+- **Background Cartesian Grid**: Automatic grid generation based on input geometry.
+- **Eikonal Equation Solver**: Compute accurate distance fields using the Eikonal equation.
+- **Gradient Computation**: Calculate gradient magnitude of distance functions.
+- **Prism Mesh Generation**: Create high-quality prism meshes for Source Functions.
+- **Visualization Ready**: Export VTK and MSH formats for visualization.
+
+## 🔧 Installation
+
+### Prerequisites
+- C++17 compatible compiler (GCC 7+, Clang 5+, or MSVC 2017+)
+- CMake 3.10 or higher
+
+### Build Instructions
+```bash
+# Clone the repository
+git clone git@github.com:graceidea/eikonalPrism.git
+cd eikonalPrism
+
+# Create build directory and compile
+mkdir build && cd build
+cmake ..
+make -j\$(nproc)
+
+# Run tests
+cd bin/
+./test
+```
+
+## ⚙️ Pipeline
+The `eikonalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
+
+| Step | Operation Phase | Input Asset | Output Generated File | Output Visualization |
+| :---: | :--- | :--- | :--- | :---: |
+| **1** | **Source Function (SF) Processing** | `input.obj` | `polygon.msh` | [View Geometry](#1-source-function-processing) |
+| **2** | **Background Cartesian Grid (BCG)** | `polygon.msh` | `grid.msh` | [View Grid](#2-background-cartesian-grid) |
+| **3** | **Eikonal Distance Field Computation** | `grid.msh` | `distance_exact.vtk` | [View Field](#3-eikonal-distance-field-computation) |
+| **4** | **Gradient of Distance Function (GDF)**| `distance_exact.vtk` | `gradient_magnitude.vtk`| [View Gradient](#4-gradient-of-distance-function) |
+| **5** | **Prism Mesh Generation** | `gradient_magnitude.vtk`| `prism.msh` | [View Mesh](#5-prism-mesh-generation) |
+
+---
+
+## 🚀 Usage
+Run the main executable from the build directory by passing your input geometric configuration file or object:
+
+```bash
+./bin/eikonalPrism path/to/input.obj
+```
+
+## 📂 Expected Output Files
+Upon successful execution, the pipeline generates the following assets in your output directory:
+- `polygon.msh`: Extracted and processed boundary polygon mesh.
+- `grid.msh`: Generated background Cartesian grid bounding the geometry.
+- `distance_exact.vtk`: Computed exact distance field data.
+- `gradient_magnitude.vtk`: Computed gradient magnitudes of the distance field.
+- `prism.msh`: Final generated volumetric prism mesh.
+
+## 📊 Visualization
+The output files are fully compatible with modern scientific visualization software like **ParaView** or **Gmsh**.
+
+### 1. Source Function Processing
+*   Open `polygon.msh` to verify boundary face definitions and closure constraints.
+
+### 2. Background Cartesian Grid
+*   Open `grid.msh` to review domain bounds and grid resolution alignment.
+
+### 3. Eikonal Distance Field Computation
+*   Load `distance_exact.vtk` in ParaView and apply a **Contour** filter to visualize distance isolines.
+
+### 4. Gradient of Distance Function
+*   Load `gradient_magnitude.vtk` to view the vector fields and differential variations.
+
+### 5. Prism Mesh Generation
+*   Open `prism.msh` in Gmsh to evaluate element quality, aspect ratios, and boundary layers.
+
+## 🧱 Dependencies
+- Standard C++17 Library
+- *Add any other external libraries used here (e.g., Eigen, Gmsh API, VTK if applicable)*
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # EiknoalPrism
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
