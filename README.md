@@ -45,29 +45,6 @@ cmake ..
 make -j$(nproc)  # Use all available cores
 
 
-
-
-
-
-# eikonalPrism
-
-A modern project implementation for processing distance function for a Source Function using Eiqonal Equation.
-
----
-
-### 🔧 Installation
-
-```bash
-# Clone the repository
-git clone git@github.com:graceidea/eiknoalPrism.git
-cd eiknoalPrism/
-
-# Build the binaries
-mkdir build && cd build
-cmake ..
-make
-```
-
 ### 🧪 Running Tests
 
 ```bash
