@@ -1,3 +1,29 @@
+# eiknoalPrism
+
+A modern project implementation for processing Source Functions.
+
+---
+
+### 🔧 Installation
+
+```bash
+# Clone the repository
+git clone git@github.com:graceidea/eiknoalPrism.git
+cd eiknoalPrism/
+
+# Build the binaries
+mkdir build && cd build
+cmake ..
+make
+```
+
+### 🧪 Running Tests
+
+```bash
+cd eiknoalPrism/build/bin/
+./test
+```
+
 ### ⚙️ Core Pipeline (What It Does)
 
 The `eiknoalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
@@ -53,31 +79,7 @@ Constructs structured layers of anisotropic prism elements radiating away from t
 
 
 
-# eiknoalPrism
 
-A modern project implementation for processing Source Functions.
-
----
-
-### 🔧 Installation
-
-```bash
-# Clone the repository
-git clone git@github.com:graceidea/eiknoalPrism.git
-cd eiknoalPrism/
-
-# Build the binaries
-mkdir build && cd build
-cmake ..
-make
-```
-
-### 🧪 Running Tests
-
-```bash
-cd eiknoalPrism/build/bin/
-./test
-```
 
 ### ⚙️ Core Functionality
 
