@@ -10,7 +10,7 @@ A modern C++ implementation for processing Source Functions (SF) using the Eikon
 
 - [Features](#-features)
 - [Installation](#-installation)
-- [Pipeline (What It Does)](#-Pipeline)
+- [Pipeline](#-Pipeline)
 - [Usage](#-usage)
 - [Output Files](#-output-files)
 - [Dependencies](#-dependencies)
@@ -48,12 +48,12 @@ ls ../../tests/example/
 # Expected output:
 input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
 
-# 🧪 Running Tests
+# Running Tests
 cd eiknoalPrism/build/bin/
 ./test
 
 
-### ⚙️ Pipeline (What It Does)
+### ⚙️ Pipeline
 
 The `eikonalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
 
