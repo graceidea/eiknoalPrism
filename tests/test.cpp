@@ -38,7 +38,6 @@ int main(int argc, char** argv) {
       dis.push_back(0.4*(i+1));
     pm.createVerts(poly, numlayer,dis);
     pm.createEdges(poly,numlayer);
-    pm.writeMSH("prismMesh.msh");
 
     //5, write outputs
     writeOutput(poly, grid, T_exact,xx, yy);   

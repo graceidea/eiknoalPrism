@@ -14,7 +14,7 @@ void readInputPolygon(std::string obj_filename,Polygon2D& poly)
     std::cout << "  1. READ INPUT CLOSED CURVE FROM OBJ FILE" << std::endl;
     std::cout << "==========================================" << std::endl;
     
-    obj_filename = "input.obj";     
+    obj_filename = "../../tests/example/input.obj";     
     std::cout << "  Reading polygon from: " << obj_filename << std::endl;
  
     // Check if file exists

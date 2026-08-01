@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <sys/stat.h>  // For mkdir on Linux/Unix
+#include <errno.h>     // For errno
 
 // Check if OpenMP is available
 #ifdef _OPENMP
@@ -123,6 +125,16 @@ void computeDistance(const Polygon2D& poly,Eigen::MatrixXd& T_exact,
             }
     }
 }
+
+// Function to create directory if it doesn't exist
+void createDirectoryIfNeeded(const std::string& path) {
+    #ifdef _WIN32
+        _mkdir(path.c_str());
+    #else
+        mkdir(path.c_str(), 0777);
+    #endif
+}
+
 void computeGradientMagnitude(Grid grid,Eigen::MatrixXd& T_exact,
       Eigen::VectorXd& xx, Eigen::VectorXd& yy,Eigen::MatrixXd& grad_mag)
 {
@@ -151,22 +163,33 @@ void writeOutput(Polygon2D poly, Grid grid, Eigen::MatrixXd& T_exact,
     std::cout<<"===================================="<<std::endl; 
 
     // Write exact distance field
-    saveAsVTK(T_exact, xx, yy, "distance_exact.vtk", "Distance");
+    std::string outputDir = "../../tests/example/";
+    createDirectoryIfNeeded(outputDir);  // Create directory if needed
+    std::string filename = outputDir + "distance_exact.vtk";
+    saveAsVTK(T_exact, xx, yy, filename, "Distance");
+    //saveAsVTK(T_exact, xx, yy, "distance_exact.vtk", "Distance");
     std::cout << " Wrote: distance_exact.vtk" << std::endl;
              
     Eigen::MatrixXd grad_mag(grid.nx, grid.ny); 
-    computeGradientMagnitude(grid,T_exact,xx,yy,grad_mag);  
-    saveAsVTK(grad_mag, xx, yy, "gradient_magnitude.vtk", "GradientMagnitude");
+    computeGradientMagnitude(grid,T_exact,xx,yy,grad_mag); 
+    filename = outputDir + "gradient_magnitude.vtk"; 
+    saveAsVTK(grad_mag, xx, yy, filename, "GradientMagnitude");
+    //saveAsVTK(grad_mag, xx, yy, "gradient_magnitude.vtk", "GradientMagnitude");
     std::cout << " Wrote: gradient_magnitude.vtk" << std::endl;
 
-    writePolygonVTK(poly, "polygon.vtk");
-    std::cout << " Wrote: polygon.vtk" << std::endl;       
-    writePolygonGmsh(poly, "polygon.msh");
+    //writePolygonVTK(poly, "polygon.vtk");
+    //std::cout << " Wrote: polygon.vtk" << std::endl; 
+    filename = outputDir + "polygon.msh";
+    writePolygonGmsh(poly, filename);       
+    //writePolygonGmsh(poly, "polygon.msh");
     std::cout << " Wrote: polygon.msh" << std::endl;
         
-    writeGridToVTK(xx, yy, "grid.vtk");
-    std::cout << " Wrote: grid.vtk" << std::endl;
-    writeGridToMSH(xx, yy, "grid.msh");
+    //writeGridToVTK(xx, yy, "grid.vtk");
+    //std::cout << " Wrote: grid.vtk" << std::endl;
+    
+    
+    filename = outputDir + "grid.msh";
+    writeGridToMSH(xx, yy, filename);
     std::cout << " Wrote: grid.msh" << std::endl; 
 
     std::cout << "\n=== Results Summary ===" << std::endl;

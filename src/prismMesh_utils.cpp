@@ -1,9 +1,14 @@
 // PrismMesh2D.cpp
 #include "prismMesh_utils.hpp"
 #include "io_utils.hpp"
+#include "cartesianMesh_utils.hpp"
 #include <sstream>
 #include <iomanip>
 #include <type_traits>
+#include <sys/stat.h>  // For mkdir on Linux/Unix
+#include <errno.h>     // For errno
+
+
 PrismMesh2D::PrismMesh2D() {
     // Constructor
 }
@@ -156,8 +161,12 @@ void PrismMesh2D::createEdges(Polygon2D& poly, int numlayer)
         this->printVector(edges,"polygon.edges");
         this->printVector(faces,"polygon.faces");
     }
-        //std::cout<<"WRITE OUT prism.msh"<<std::endl;
-        this->writeMSH("prism.msh");
+    
+    std::cout<<"WRITE OUT prism.msh"<<std::endl;
+    std::string outputDir = "../../tests/example/";
+    createDirectoryIfNeeded(outputDir);  // Create directory if needed
+    std::string filename = outputDir + "prism.msh";
+    this->writeMSH(filename);
     
     std::cout<<" CreateEdges: Total Edges= "<<edges.size()
         <<" Total Faces="<<faces.size()<<std::endl;

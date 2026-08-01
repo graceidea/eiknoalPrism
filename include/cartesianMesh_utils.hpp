@@ -10,7 +10,8 @@ struct Grid {
  double grid_spacing = 0.05; 
 };
 
-void readInputPolygon(std::string obj_filename,Polygon2D& poly);//,Grid& grid);
+void readInputPolygon(std::string obj_filename,Polygon2D& poly);
+void createDirectoryIfNeeded(const std::string& path);
 void computeGridParameters(const Polygon2D& poly, Grid& grid);
                            //int& nx, int& ny,
                            //double& xmin, double& xmax,
