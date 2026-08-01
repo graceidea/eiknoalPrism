@@ -1,6 +1,6 @@
 # eikonalPrism
 
-A modern project implementation for processing Source Functions.
+A modern project implementation for processing distance function for a Source Function using Eiqonal Equation.
 
 ---
 
