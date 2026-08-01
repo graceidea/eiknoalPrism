@@ -1,5 +1,3 @@
-git@github.com:graceidea/eiknoalPrism.git
-
 =============HOW TO INSTALL
 
 git clone  git@github.com:graceidea/eiknoalPrism.git
