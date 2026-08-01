@@ -10,9 +10,10 @@ A modern C++ implementation for processing Source Functions (SF) using the Eikon
 
 - [Features](#-features)
 - [Installation](#-installation)
-- [Pipeline](#-Pipeline)
+- [Pipeline](#-pipeline)
 - [Usage](#-usage)
-- [Output Files](#-output-files)
+- [Expected outpu](#-output-files)
+- [Visualization](#visualization)
 - [Dependencies](#-dependencies)
 - [License](#-license)
 
@@ -45,12 +46,11 @@ cmake ..
 make -j$(nproc)  # Use all available cores
 ls ../../tests/example/
 
-# Expected output:
-input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
 
 # Running Tests
 cd eiknoalPrism/build/bin/
 ./test
+
 
 
 ### ⚙️ Pipeline
@@ -91,7 +91,9 @@ The gradient magnitude of the distance function is calculated to analyze geometr
 The final step generates a high-quality prism mesh for the Source Function with proper boundary layer resolution. This mesh is ideal for finite element simulations and is saved as prism.msh.
 
 <div align="center"> <img width="505" height="534" alt="Prism Mesh" src="https://github.com/user-attachments/assets/2c1f973c-178f-4e40-9a9a-59cc7c8848ab" /> <br> <em><strong>Figure 5:</strong> Prism mesh generated for the Source Function</em> </div>
-📂 Usage
+
+
+### 📂 Usage
 Running the Test Suite
 bash
 cd build/bin/
@@ -112,18 +114,22 @@ cd build/bin/
 ./test
 
 
-📊 Visualization
+### Expected output:
+input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
+
+
+### 📊 Visualization
 ParaView (Recommended for .vtk files) - Open-source scientific visualization
 Gmsh (Recommended for polygon.msh, grid.msh, prism.msh) - Mesh generation and visualization
 
 
 
-🔬 Dependencies
+### 🔬 Dependencies
 HDF5	Mesh file I/O	1.10+
 Eigen3	Linear algebra operations	3.3+
 Boost	Utility functions	1.70+
 
-📄 License
+### 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 
