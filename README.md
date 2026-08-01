@@ -31,7 +31,6 @@ A modern C++ implementation for processing Source Functions (SF) using the Eikon
 
 - C++17 compatible compiler (GCC 7+, Clang 5+, or MSVC 2017+)
 - CMake 3.10 or higher
-- HDF5 library (for mesh file support)
 
 ### Build Instructions
 
