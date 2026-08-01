@@ -1,3 +1,42 @@
+# eiknoalPrism
+
+A modern project implementation for processing Source Functions.
+
+---
+
+### 🔧 Installation
+
+```bash
+# Clone the repository
+git clone git@github.com:graceidea/eiknoalPrism.git
+cd eiknoalPrism/
+
+# Build the binaries
+mkdir build && cd build
+cmake ..
+make
+```
+
+### 🧪 Running Tests
+
+```bash
+cd eiknoalPrism/build/bin/
+./test
+```
+
+### ⚙️ Core Functionality
+
+The application processes **Source Functions (SF)** represented as closed polygons.
+
+| Phase | Target File Path | Format Description |
+| :--- | :--- | :--- |
+| **Input** | `eiknoalPrism/tests/example/input.obj` | Source closed polygon file |
+| **Output** | `eiknoalPrism/tests/example/polygon.msh` | Generated mesh function file |
+
+> ℹ️ **Note:** The example dataset can be verified locally inside the `tests/example` directory immediately after running `./test`.
+
+
+
 =============HOW TO INSTALL
 
 git clone  git@github.com:graceidea/eiknoalPrism.git
