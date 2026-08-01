@@ -1,3 +1,55 @@
+# EiknoalPrism
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++](https://img.shields.io/badge/C++-17-blue.svg)](https://isocpp.org/)
+[![CMake](https://img.shields.io/badge/CMake-3.10+-green.svg)](https://cmake.org/)
+
+A modern C++ implementation for processing Source Functions (SF) using the Eikonal equation to generate distance fields and prism meshes.
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Installation](#-installation)
+- [Workflow](#-workflow)
+- [Usage](#-usage)
+- [Output Files](#-output-files)
+- [Dependencies](#-dependencies)
+- [License](#-license)
+
+## ✨ Features
+
+- **Source Function Processing**: Read closed polygon representations of Source Functions
+- **Background Cartesian Grid**: Automatic grid generation based on input geometry
+- **Eikonal Equation Solver**: Compute accurate distance fields using the Eikonal equation
+- **Gradient Computation**: Calculate gradient magnitude of distance functions
+- **Prism Mesh Generation**: Create high-quality prism meshes for Source Functions
+- **Visualization Ready**: Export VTK and MSH formats for visualization
+
+## 🔧 Installation
+
+### Prerequisites
+
+- C++17 compatible compiler (GCC 7+, Clang 5+, or MSVC 2017+)
+- CMake 3.10 or higher
+- HDF5 library (for mesh file support)
+
+### Build Instructions
+
+```bash
+# Clone the repository
+git clone git@github.com:graceidea/eiknoalPrism.git
+cd eiknoalPrism/
+
+# Build the binaries
+mkdir build && cd build
+cmake ..
+make -j$(nproc)  # Use all available cores
+
+
+
+
+
+
 # eikonalPrism
 
 A modern project implementation for processing distance function for a Source Function using Eiqonal Equation.
