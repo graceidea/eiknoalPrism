@@ -1,15 +1,23 @@
 git@github.com:graceidea/eiknoalPrism.git
 
 =============HOW TO INSTALL
+
 git clone  git@github.com:graceidea/eiknoalPrism.git
+
 cd eiknoalPrism/
+
 mkdir build
+
 cd build
+
 cmake ..
+
 make
 
 =============HOW TO RUN TEST
+
 cd eiknoalPrism/build/bin/
+
 ./test
 
 =============WHAT IT DOES
