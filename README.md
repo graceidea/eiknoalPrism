@@ -46,9 +46,9 @@ make -j$(nproc)  # Use all available cores
 ls ../../tests/example/
 
 # Expected output:
-  input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
+input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
 
-### 🧪 Running Tests
+# 🧪 Running Tests
 cd eiknoalPrism/build/bin/
 ./test
 
