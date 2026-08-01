@@ -69,6 +69,29 @@ Upon successful execution, the pipeline generates the following assets in your o
 - `distance_exact.vtk`: Computed exact distance field data.
 - `gradient_magnitude.vtk`: Computed gradient magnitudes of the distance field.
 - `prism.msh`: Final generated volumetric prism mesh.
+The application processes Source Functions (SF) represented as closed polygons through a five-step pipeline:
+
+1. Read Source Function (Input)
+The process begins by reading a closed polygon representation of the Source Function from an OBJ file. The input file is located at eiknoalPrism/tests/example/input.obj.
+
+<div align="center"> <img width="573" height="567" alt="Input Source Function" src="https://github.com/user-attachments/assets/60c52924-c825-404e-9e0e-464f4000b77d" /> <br> <em><strong>Figure 1:</strong> Input Source Function (SF) - Closed polygon representation</em> </div>
+2. Generate Background Cartesian Grid (BCG)
+A structured Cartesian grid is automatically generated based on the input Source Function boundaries. This grid provides the computational domain for subsequent calculations. The grid file is saved as grid.msh in the tests/example/ directory.
+
+<div align="center"> <img width="547" height="550" alt="BCG and SF" src="https://github.com/user-attachments/assets/3de02070-47e9-49e8-b4d7-212434b02843" /> <br> <em><strong>Figure 2:</strong> Background Cartesian Grid (BCG) with Source Function overlay</em> </div>
+3. Compute Distance Function
+The Eikonal equation is solved to compute the signed distance field from the Source Function. This distance field is crucial for understanding the geometric properties of the Source Function. The output is saved as distance_exact.vtk.
+
+<div align="center"> <img width="530" height="532" alt="Distance Field" src="https://github.com/user-attachments/assets/ba4d7b17-d050-4af9-8cf4-bfb7cf9b7eb0" /> <br> <em><strong>Figure 3:</strong> Distance field computed from the Source Function using the Eikonal equation</em> </div>
+4. Compute Gradient Magnitude
+The gradient magnitude of the distance function is calculated to analyze geometric properties such as boundary normals and curvature. This output is saved as gradient_magnitude.vtk.
+
+<div align="center"> <img width="529" height="533" alt="Gradient Magnitude" src="https://github.com/user-attachments/assets/bbf6c3c2-ff62-4d83-ac45-c895d6ec39a6" /> <br> <em><strong>Figure 4:</strong> Gradient magnitude of the distance function</em> </div>
+5. Generate Prism Mesh
+The final step generates a high-quality prism mesh for the Source Function with proper boundary layer resolution. This mesh is ideal for finite element simulations and is saved as prism.msh.
+
+<div align="center"> <img width="505" height="534" alt="Prism Mesh" src="https://github.com/user-attachments/assets/2c1f973c-178f-4e40-9a9a-59cc7c8848ab" /> <br> <em><strong>Figure 5:</strong> Prism mesh generated for the Source Function</em> </div>
+  
 
 ## 📊 Visualization
 The output files are fully compatible with modern scientific visualization software like **ParaView** or **Gmsh**.
