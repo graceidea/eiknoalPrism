@@ -10,7 +10,7 @@ A modern C++ implementation for processing Source Functions (SF) using the Eikon
 
 - [Features](#-features)
 - [Installation](#-installation)
-- [Workflow](#-workflow)
+- [Pipeline (What It Does)](#-Pipeline)
 - [Usage](#-usage)
 - [Output Files](#-output-files)
 - [Dependencies](#-dependencies)
@@ -43,16 +43,19 @@ cd eiknoalPrism/
 mkdir build && cd build
 cmake ..
 make -j$(nproc)  # Use all available cores
+ls ../../tests/example/
 
+# Expected output:
+  input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
 
 ### 🧪 Running Tests
 cd eiknoalPrism/build/bin/
 ./test
-```
 
-### ⚙️ Core Pipeline (What It Does)
 
-The `eiknoalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
+### ⚙️ Pipeline (What It Does)
+
+The `eikonalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
 
 | Step | Operation Phase | Input Asset | Output Generated File | Output Visualization |
 | :---: | :--- | :--- | :--- | :---: |
@@ -107,31 +110,15 @@ After running ./test, you can verify all output files are generated:
 bash
 cd build/bin/
 ./test
-ls ../../tests/example/
-# Expected output:
-# input.obj polygon.msh grid.msh distance_exact.vtk gradient_magnitude.vtk prism.msh
+
 
 📊 Visualization
-VTK Files
-The VTK files (distance_exact.vtk and gradient_magnitude.vtk) contain scalar fields that can be visualized using:
+ParaView (Recommended for .vtk files) - Open-source scientific visualization
+Gmsh (Recommended for polygon.msh, grid.msh, prism.msh) - Mesh generation and visualization
 
-ParaView (Recommended) - Open-source scientific visualization
 
-VisIt - Advanced visualization and analysis
-
-Mayavi - Python-based 3D scientific visualization
-
-MSH Files
-The MSH files (polygon.msh, grid.msh, prism.msh) contain mesh data compatible with:
-
-Gmsh - Mesh generation and visualization
-
-FEniCS - Finite element simulation
-
-FreeFEM - PDE solving environment
 
 🔬 Dependencies
-Library	Purpose	Version
 HDF5	Mesh file I/O	1.10+
 Eigen3	Linear algebra operations	3.3+
 Boost	Utility functions	1.70+
