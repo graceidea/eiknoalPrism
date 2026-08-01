@@ -1,3 +1,58 @@
+### ⚙️ Core Pipeline (What It Does)
+
+The `eiknoalPrism` engine executes a 5-step geometric and differential pipeline to generate prism meshes from a closed polygon boundary using the Eikonal equation.
+
+| Step | Operation Phase | Input Asset | Output Generated File | Output Visualization |
+| :---: | :--- | :--- | :--- | :---: |
+| **1** | **Source Function (SF) Processing** | `input.obj` | `polygon.msh` | [View Geometry](#1-source-function) |
+| **2** | **Background Cartesian Grid (BCG)** | `polygon.msh` | `grid.msh` | [View Grid](#2-background-cartesian-grid) |
+| **3** | **Eikonal Distance Field Computation** | `grid.msh` | `distance_exact.vtk` | [View Field](#3-distance-field) |
+| **4** | **Gradient of Distance Function (GDF)**| `distance_exact.vtk` | `gradient_magnitude.vtk`| [View Gradient](#4-gradient-field) |
+| **5** | **Prism Mesh Generation** | `gradient_magnitude.vtk`| `prism.msh` | [View Mesh](#5-prism-mesh) |
+
+---
+
+#### 1. Source Function (SF)
+Reads the initial closed boundary polygon setup.
+<img src="https://github.com/user-attachments/assets/60c52924-c825-404e-9e0e-464f4000b77d" width="450" alt="Source Function Polygon" />
+
+#### 2. Background Cartesian Grid (BCG)
+Generates the background bounding grid tracking the boundary path.
+<img src="https://github.com/user-attachments/assets/3de02070-47e9-49e8-b4d7-212434b02843" width="450" alt="Background Cartesian Grid" />
+
+#### 3. Distance Field
+Solves the Eikonal equation to yield a smooth, continuous scalar distance field map.
+<img src="https://github.com/user-attachments/assets/ba4d7b17-d050-4af9-8cf4-bfb7cf9b7eb0" width="450" alt="Eikonal Distance Field" />
+
+#### 4. Gradient Field (GDF)
+Computes the vector gradients and magnitude spikes along the medial axis partitions.
+<img src="https://github.com/user-attachments/assets/bbf6c3c2-ff62-4d83-ac45-c895d6ec39a6" width="450" alt="Gradient of Distance Function" />
+
+#### 5. Prism Mesh
+Constructs structured layers of anisotropic prism elements radiating away from the geometry boundary.
+<img src="https://github.com/user-attachments/assets/2c1f973c-178f-4e40-9a9a-59cc7c8848ab" width="450" alt="Prism Mesh Generation" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # eiknoalPrism
 
 A modern project implementation for processing Source Functions.
