@@ -63,16 +63,10 @@ Run the main executable from the build directory by passing your input geometric
 ```
 
 ## 📂 Expected Output Files
-Upon successful execution, the pipeline generates the following assets in your output directory:
-- `polygon.msh`: Extracted and processed boundary polygon mesh.
-- `grid.msh`: Generated background Cartesian grid bounding the geometry.
-- `distance_exact.vtk`: Computed exact distance field data.
-- `gradient_magnitude.vtk`: Computed gradient magnitudes of the distance field.
-- `prism.msh`: Final generated volumetric prism mesh.
-The application processes Source Functions (SF) represented as closed polygons through a five-step pipeline:
+Upon successful execution, the pipeline generates the following assets in your output directory. The application processes Source Functions (SF) represented as closed polygons through a five-step pipeline:
 
 1. Read Source Function (Input)
-The process begins by reading a closed polygon representation of the Source Function from an OBJ file. The input file is located at eiknoalPrism/tests/example/input.obj.
+The process begins by reading a closed polygon representation of the Source Function from an OBJ file. The input file is located at eiknoalPrism/tests/example/input.obj. The  extracted polygon mesh is processed and boundary polygon mesh is saved in polygon.msh.
 
 <div align="center"> <img width="573" height="567" alt="Input Source Function" src="https://github.com/user-attachments/assets/60c52924-c825-404e-9e0e-464f4000b77d" /> <br> <em><strong>Figure 1:</strong> Input Source Function (SF) - Closed polygon representation</em> </div>
 2. Generate Background Cartesian Grid (BCG)
