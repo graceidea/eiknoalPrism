@@ -1,4 +1,4 @@
-# eiknoalPrism
+# eikonalPrism
 
 A modern project implementation for processing Source Functions.
 
